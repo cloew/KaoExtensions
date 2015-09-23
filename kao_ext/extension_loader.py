@@ -1,3 +1,4 @@
+from importlib.machinery import PathFinder, SourceFileLoader
 import sys
 
 class ExtensionLoader:
@@ -15,14 +16,13 @@ class ExtensionLoader:
     def find_module(self, fullname, path=None):
         """ Method to find the given module name """
         if fullname.startswith(self.parent_module):
-            return self
-    
-    def load_module(self, fullname):
-        """ Load the given module """
+            path = self.getPath(fullname)
+            return SourceFileLoader(fullname, path)
+            
+    def getPath(self, fullname):
+        """ Return the proper path to the module specified in fullname """
         actualName = self.getActualModuleName(fullname)
-        __import__(actualName)
-        sys.modules[fullname] = sys.modules[actualName]
-        return sys.modules[actualName]
+        return PathFinder.find_spec(actualName).origin
         
     def getActualModuleName(self, fullname):
         """ Return the actual module name to import """
